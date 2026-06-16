@@ -1,0 +1,622 @@
+{
+  "categories": [
+    {
+      "id": "ice",
+      "label": "Ledeni okusi"
+    },
+    {
+      "id": "fruit",
+      "label": "Voćni okusi"
+    },
+    {
+      "id": "dessert",
+      "label": "Desertni okusi"
+    },
+    {
+      "id": "mint",
+      "label": "Mentol i svježina"
+    },
+    {
+      "id": "exotic",
+      "label": "Egzotične mješavine"
+    },
+    {
+      "id": "premium",
+      "label": "Premium serija"
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "slug": "ice-lemon",
+      "name": "Ice Lemon",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "ice",
+      "categoryLabel": "Ledeni okusi",
+      "strength": 3,
+      "origin": "Premium serija",
+      "image": "/proizvodi/6.jpeg",
+      "images": [
+        "/proizvodi/6.jpeg"
+      ],
+      "description": "Layali Ice Lemon spaja svježu limunadu sa hladnim završetkom koji osvježava i traje. Idealno za ljetnu ponudu i lounge barove koji žele lagan citrusni profil.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Limun, led, citrus",
+        "Preporuka": "Solo ili sa mentom"
+      },
+      "tags": [
+        "best-sellers",
+        "ice",
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": true,
+      "isHighlighted": true,
+      "showOnHomepage": true,
+      "homepageOrder": 1,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "2",
+      "slug": "ice-raspberry",
+      "name": "Ice Raspberry",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "ice",
+      "categoryLabel": "Ledeni okusi",
+      "strength": 4,
+      "origin": "Premium serija",
+      "image": "/proizvodi/14.jpeg",
+      "images": [
+        "/proizvodi/14.jpeg"
+      ],
+      "description": "Layali Ice Raspberry donosi zrele note maline sa intenzivnim led efektom. Snažan i upadljiv profil za premium lounge barove i kafiće.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Malina, led, voće",
+        "Preporuka": "Solo ili sa citrusnim miksom"
+      },
+      "tags": [
+        "best-sellers",
+        "ice",
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": true,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 2,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "3",
+      "slug": "ice-pineapple",
+      "name": "Ice Pineapple",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "ice",
+      "categoryLabel": "Ledeni okusi",
+      "strength": 3,
+      "origin": "Premium serija",
+      "image": "/proizvodi/8.jpeg",
+      "images": [
+        "/proizvodi/8.jpeg",
+        "/proizvodi/18.jpeg"
+      ],
+      "description": "Layali Ice Pineapple kombinuje tropsku slatkoću ananasa sa svježim led finishom. Sunčan profil za sezonske kampanje i svakodnevnu ponudu.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Ananas, tropsko, led",
+        "Preporuka": "Solo ili sa mango miksom"
+      },
+      "tags": [
+        "best-sellers",
+        "ice",
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": true,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 3,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "4",
+      "slug": "ice-strawberry",
+      "name": "Ice Strawberry",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "ice",
+      "categoryLabel": "Ledeni okusi",
+      "strength": 3,
+      "origin": "Premium serija",
+      "image": "/proizvodi/3.jpeg",
+      "images": [
+        "/proizvodi/3.jpeg",
+        "/proizvodi/9.jpeg"
+      ],
+      "description": "Layali Ice Strawberry spaja slatke jagode sa čistim led efektom. Mekan, aromatičan i vrlo prodajan profil za moderne lokale.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Jagoda, led, voće",
+        "Preporuka": "Solo ili sa vanilom"
+      },
+      "tags": [
+        "ice",
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 4,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "5",
+      "slug": "ice-cherry",
+      "name": "Ice Cherry",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "ice",
+      "categoryLabel": "Ledeni okusi",
+      "strength": 4,
+      "origin": "Premium serija",
+      "image": "/proizvodi/11.jpeg",
+      "images": [
+        "/proizvodi/11.jpeg"
+      ],
+      "description": "Layali Ice Cherry donosi intenzivnu višnju sa hladnim završetkom. Bogat, pun okus koji privlači goste i drži sesiju stabilnu.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Višnja, led, voće",
+        "Preporuka": "Solo ili sa bobicama"
+      },
+      "tags": [
+        "ice",
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 5,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "6",
+      "slug": "ice-watermelon",
+      "name": "Ice Watermelon",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "ice",
+      "categoryLabel": "Ledeni okusi",
+      "strength": 3,
+      "origin": "Premium serija",
+      "image": "/proizvodi/12.jpeg",
+      "images": [
+        "/proizvodi/12.jpeg"
+      ],
+      "description": "Layali Ice Watermelon nudi svježu lubenicu sa led finishom. Lagan, osvježavajući profil idealan za toplu sezonu i mlade goste.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Lubenica, led, svježina",
+        "Preporuka": "Solo ili sa mentom"
+      },
+      "tags": [
+        "ice",
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 6,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "7",
+      "slug": "citrus",
+      "name": "Citrus",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "fruit",
+      "categoryLabel": "Voćni okusi",
+      "strength": 3,
+      "origin": "Premium serija",
+      "image": "/proizvodi/1.jpeg",
+      "images": [
+        "/proizvodi/1.jpeg"
+      ],
+      "description": "Layali Citrus spaja limun, naranču i lime u balansiran citrusni profil. Svjež i prodajan okus za cijele godine.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Citrus, limun, naranča",
+        "Preporuka": "Solo ili sa led mixom"
+      },
+      "tags": [
+        "fruit",
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 7,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "8",
+      "slug": "tripleberry",
+      "name": "Tripleberry",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "fruit",
+      "categoryLabel": "Voćni okusi",
+      "strength": 3,
+      "origin": "Premium serija",
+      "image": "/proizvodi/4.jpeg",
+      "images": [
+        "/proizvodi/4.jpeg"
+      ],
+      "description": "Layali Tripleberry kombinuje malinu, borovnicu i blackberry u bogat voćni profil. Mekana slatkoća sa premium aromom.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Bobice, malina, borovnica",
+        "Preporuka": "Solo ili sa kremastim miksom"
+      },
+      "tags": [
+        "fruit",
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 8,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "9",
+      "slug": "grape",
+      "name": "Grape",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "fruit",
+      "categoryLabel": "Voćni okusi",
+      "strength": 3,
+      "origin": "Premium serija",
+      "image": "/proizvodi/13.jpeg",
+      "images": [
+        "/proizvodi/13.jpeg"
+      ],
+      "description": "Layali Grape donosi slatke note bijelog i crnog grožđa u jedinstven voćni profil. Klasičan i pouzdan izbor za široku publiku.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Grožđe, voće, slatkoća",
+        "Preporuka": "Solo ili sa mentom"
+      },
+      "tags": [
+        "fruit",
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 9,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "10",
+      "slug": "pinkman",
+      "name": "Pinkman",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "fruit",
+      "categoryLabel": "Voćni okusi",
+      "strength": 4,
+      "origin": "Premium serija",
+      "image": "/proizvodi/10.jpeg",
+      "images": [
+        "/proizvodi/10.jpeg"
+      ],
+      "description": "Layali Pinkman spaja grejpfrut, naranču i bobice u energičan, upadljiv profil. Moderan okus za lounge barove sa mladom publikom.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Grejpfrut, naranča, bobice",
+        "Preporuka": "Solo ili sa citrus mixom"
+      },
+      "tags": [
+        "new-arrivals",
+        "fruit",
+        "premium"
+      ],
+      "isNew": true,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 10,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "11",
+      "slug": "peach-caramel",
+      "name": "Peach Caramel",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "dessert",
+      "categoryLabel": "Desertni okusi",
+      "strength": 2,
+      "origin": "Premium serija",
+      "image": "/proizvodi/2.jpeg",
+      "images": [
+        "/proizvodi/2.jpeg"
+      ],
+      "description": "Layali Peach Caramel spaja sočne breskve sa toplom karamelom. Desertni profil za večernju ponudu i signature menije.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Breskva, karamela, krema",
+        "Preporuka": "Solo ili sa vanilom"
+      },
+      "tags": [
+        "new-arrivals",
+        "premium"
+      ],
+      "isNew": true,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 11,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "12",
+      "slug": "waffle-rush",
+      "name": "Waffle Rush",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "dessert",
+      "categoryLabel": "Desertni okusi",
+      "strength": 2,
+      "origin": "Premium serija",
+      "image": "/proizvodi/5.jpeg",
+      "images": [
+        "/proizvodi/5.jpeg"
+      ],
+      "description": "Layali Waffle Rush donosi toplu aromu vafla sa karamelnim i kremastim notama. Desertni karakter za premium doživljaj.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Vafle, karamela, krema",
+        "Preporuka": "Solo ili sa vanilom"
+      },
+      "tags": [
+        "new-arrivals",
+        "exotic",
+        "premium"
+      ],
+      "isNew": true,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 12,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "13",
+      "slug": "mint-bliss",
+      "name": "Mint Bliss",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "mint",
+      "categoryLabel": "Mentol i svježina",
+      "strength": 2,
+      "origin": "Premium serija",
+      "image": "/proizvodi/15.jpeg",
+      "images": [
+        "/proizvodi/15.jpeg"
+      ],
+      "description": "Layali Mint Bliss nudi čistu mentu sa mekanim završetkom. Idealno kao solo okus ili baza za mix sa voćnim profilima.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Menta, svježina, mentol",
+        "Preporuka": "Solo ili kao mixer"
+      },
+      "tags": [
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 13,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "14",
+      "slug": "marbella",
+      "name": "Marbella",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "exotic",
+      "categoryLabel": "Egzotične mješavine",
+      "strength": 3,
+      "origin": "Premium serija",
+      "image": "/proizvodi/7.jpeg",
+      "images": [
+        "/proizvodi/7.jpeg"
+      ],
+      "description": "Layali Marbella kombinuje dinju, breskvu i mentu u egzotičan, osvježavajući profil. Signature okus za premium lokale.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Dinja, breskva, menta",
+        "Preporuka": "Solo ili sa citrus mixom"
+      },
+      "tags": [
+        "exotic",
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 14,
+      "availableQuantity": null,
+      "isActive": true
+    },
+    {
+      "id": "15",
+      "slug": "two-apple",
+      "name": "Two Apple",
+      "brand": "Layali",
+      "brandSlug": "layali",
+      "category": "exotic",
+      "categoryLabel": "Egzotične mješavine",
+      "strength": 3,
+      "origin": "Premium serija",
+      "image": "/proizvodi/16.jpeg",
+      "images": [
+        "/proizvodi/16.jpeg",
+        "/proizvodi/17.jpeg"
+      ],
+      "description": "Layali Two Apple donosi klasičan profil zelene i crvene jabuke. Prepoznatljiv okus koji se lako prodaje u svim tipovima lokala.",
+      "packagingSizes": [
+        "200g",
+        "250g"
+      ],
+      "specifications": {
+        "Rez": "Srednji",
+        "Vlaga": "Srednja",
+        "Tolerancija na toplinu": "Visoka",
+        "Trajanje sesije": "60-80 min",
+        "Profil": "Dvostruka jabuka, klasik",
+        "Preporuka": "Solo ili sa mentom"
+      },
+      "tags": [
+        "exotic",
+        "premium"
+      ],
+      "isNew": false,
+      "isBestSeller": false,
+      "isHighlighted": false,
+      "showOnHomepage": true,
+      "homepageOrder": 15,
+      "availableQuantity": null,
+      "isActive": true
+    }
+  ]
+}
