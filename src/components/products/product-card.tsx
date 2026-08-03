@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ProductImageBadges } from "@/components/products/product-status-badge";
 import { StrengthIndicator } from "@/components/products/strength-indicator";
 import { ProductImage } from "@/components/products/product-image";
+import { ProductPrice } from "@/components/products/product-price";
 import { useSavedProducts } from "@/context/saved-products-context";
 import { cn } from "@/lib/utils";
 
@@ -113,6 +114,11 @@ export function ProductCard({
         <div className="mt-4">
           <StrengthIndicator strength={product.strength} />
         </div>
+        <ProductPrice
+          price={product.price}
+          salePrice={product.salePrice}
+          className="mt-3"
+        />
 
         <div className="mt-auto flex gap-2.5 pt-6">
           <Link

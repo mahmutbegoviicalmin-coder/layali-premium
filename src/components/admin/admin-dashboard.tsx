@@ -245,6 +245,7 @@ export function AdminDashboard() {
           categories={categories}
           initialProduct={editingProduct}
           variant="modal"
+          homepageCount={homepageCount}
           onSaved={() => {
             void loadData();
             closeForm();

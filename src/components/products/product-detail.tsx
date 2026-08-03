@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingBag, Check } from "lucide-react";
+import { Heart, ShoppingBag, Check, AlertCircle } from "lucide-react";
 import type { Product } from "@/lib/types";
+import { isAromaProduct } from "@/lib/collection";
 import { getBrandBySlug } from "@/lib/data/brands";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { RelatedProductsSlider } from "@/components/products/related-products";
 import { StrengthIndicator } from "@/components/products/strength-indicator";
 import { ProductStatusBadge } from "@/components/products/product-status-badge";
+import { ProductPrice } from "@/components/products/product-price";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FadeIn, SectionContainer } from "@/components/ui/section";
@@ -25,12 +28,21 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
   const { isSaved, toggleSave } = useSavedProducts();
   const { addToInquiry, isInInquiry } = useInquiryBasket();
   const [added, setAdded] = useState(false);
+  const [addError, setAddError] = useState("");
   const brand = getBrandBySlug(product.brandSlug);
   const saved = isSaved(product.id);
   const inBasket = isInInquiry(product.id);
+  const isAroma = isAromaProduct(product);
 
   const handleAddToInquiry = () => {
-    addToInquiry(product);
+    const result = addToInquiry(product);
+    if (!result.ok) {
+      setAddError(
+        "Nova kolekcija aroma i klasična kolekcija se ne mogu kombinovati. Ispraznite listu za upit pa pokušajte ponovo."
+      );
+      return;
+    }
+    setAddError("");
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
@@ -44,9 +56,18 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               Početna
             </Link>
             <span className="mx-2">/</span>
-            <Link href="/products" className="transition-colors hover:text-primary">
-              Proizvodi
-            </Link>
+            {isAroma ? (
+              <Link
+                href="/nova-kolekcija"
+                className="transition-colors hover:text-primary"
+              >
+                Nova kolekcija
+              </Link>
+            ) : (
+              <Link href="/products" className="transition-colors hover:text-primary">
+                Proizvodi
+              </Link>
+            )}
             <span className="mx-2">/</span>
             <span className="text-primary">{product.name}</span>
           </nav>
@@ -54,13 +75,21 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
 
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           <FadeIn direction="left">
-            <ProductGallery images={product.images} name={product.name} />
+            <ProductGallery
+              images={product.images}
+              name={product.name}
+              imageFit={isAroma ? "contain" : "cover"}
+              imageClassName={isAroma ? "p-6 bg-gradient-to-b from-[#f3f3f6] to-[#e9e9ee]" : undefined}
+            />
           </FadeIn>
 
           <FadeIn direction="right" delay={0.1}>
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
                 <Badge variant="gold">{product.brand}</Badge>
+                {isAroma ? (
+                  <Badge variant="muted">Nova kolekcija aroma</Badge>
+                ) : null}
                 {product.isNew && (
                   <ProductStatusBadge type="new" variant="inline" />
                 )}
@@ -83,6 +112,13 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               <div className="mt-4">
                 <StrengthIndicator strength={product.strength} />
               </div>
+
+              <ProductPrice
+                price={product.price}
+                salePrice={product.salePrice}
+                size="lg"
+                className="mt-5"
+              />
 
               <p className="mt-6 leading-relaxed text-muted">
                 {product.description}
@@ -132,7 +168,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                 </dl>
               </div>
 
-              {brand && (
+              {brand && !isAroma && (
                 <div className="mt-8 rounded-2xl border border-border bg-surface p-6">
                   <h3 className="text-sm font-semibold uppercase tracking-wider text-primary">
                     O brendu {brand.name}
@@ -143,13 +179,21 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                 </div>
               )}
 
-              <div className="mt-8 flex items-center gap-3 rounded-2xl border border-border bg-surface px-5 py-4">
-                <Check className="h-5 w-5 shrink-0 text-primary" />
+              <div className="mt-8 flex items-start gap-3 rounded-2xl border border-border bg-surface px-5 py-4">
+                <Check className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                 <p className="text-sm font-medium text-primary">
-                  Dostupno za veleprodaju. Minimalna narudžba 1 kg (mix okusa).
-                  Pakovanja 200 g i 250 g.
+                  {isAroma
+                    ? "Dostupno za veleprodaju. Minimalna narudžba 1 kg — mix okusa samo unutar Nova kolekcije aroma (250 g pakovanje). Ne miješa se sa klasičnom kolekcijom."
+                    : "Dostupno za veleprodaju. Minimalna narudžba 1 kg (mix okusa). Pakovanja 200 g i 250 g."}
                 </p>
               </div>
+
+              {addError ? (
+                <p className="mt-4 flex items-start gap-2 rounded-xl border border-amber-300/50 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  {addError}
+                </p>
+              ) : null}
 
               <div className="mt-8 flex flex-wrap gap-4">
                 <Button
@@ -186,7 +230,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
 
         <RelatedProductsSlider
           products={relatedProducts}
-          title="Slični proizvodi"
+          title={isAroma ? "Još iz Nova kolekcije" : "Slični proizvodi"}
         />
       </SectionContainer>
     </div>

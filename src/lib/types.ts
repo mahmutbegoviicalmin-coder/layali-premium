@@ -6,6 +6,8 @@ export type ProductCategory =
   | "dessert"
   | "mint";
 
+export type OrderCollection = "standard" | "aroma";
+
 export type ProductTab =
   | "best-sellers"
   | "new-arrivals"
@@ -34,14 +36,22 @@ export interface Product {
   isBestSeller?: boolean;
   /** Istaknut vizuelno na kartici (poseban okvir) */
   isHighlighted?: boolean;
-  /** Prikaz na početnoj stranici */
+  /** Prikaz na početnoj stranici (max 6) */
   showOnHomepage?: boolean;
   /** Redoslijed na početnoj (manji broj = prije) */
   homepageOrder?: number;
+  /** Redovna cijena (KM) */
+  price?: number | null;
+  /** Snižena cijena (KM); ako postoji, prikazuje se umjesto redovne */
+  salePrice?: number | null;
   /** Dostupna količina u gramima; null = bez ograničenja */
   availableQuantity?: number | null;
   /** Neaktivan proizvod se ne prikazuje na sajtu */
   isActive?: boolean;
+  /** Kolekcija za narudžbu — standard i aroma se ne mogu mixati */
+  orderCollection?: OrderCollection;
+  /** Redoslijed unutar kolekcije (manji = prije) */
+  collectionOrder?: number;
 }
 
 export interface CatalogCategory {
@@ -80,6 +90,31 @@ export interface InquiryFormData {
   message?: string;
   preferredBrands?: string;
   expectedVolume?: string;
+}
+
+export interface InquiryEmailItem {
+  productName: string;
+  brand: string;
+  packSizeGrams: number;
+  packCount: number;
+  lineGrams: number;
+  collection?: OrderCollection;
+}
+
+export interface InquirySubmissionPayload {
+  form: InquiryFormData;
+  items: InquiryEmailItem[];
+  totalOrderGrams: number;
+  orderCollection?: OrderCollection;
+}
+
+export interface ContactFormData {
+  firstName: string;
+  lastName: string;
+  businessName: string;
+  email: string;
+  phone: string;
+  message?: string;
 }
 
 export interface Testimonial {

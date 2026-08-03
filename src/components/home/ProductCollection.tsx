@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useProducts } from "@/context/products-context";
 import { ProductImage } from "@/components/products/product-image";
+import { ProductPrice } from "@/components/products/product-price";
 import { cn } from "@/lib/utils";
 
 const SLIDE_MS = 380;
@@ -327,6 +328,12 @@ export function ProductCollection() {
                   <h3 className="mt-2 font-heading text-[2rem] font-medium leading-[1.08] tracking-tight text-foreground sm:text-[2.75rem]">
                     {activeProduct.name}
                   </h3>
+                  <ProductPrice
+                    price={activeProduct.price}
+                    salePrice={activeProduct.salePrice}
+                    size="lg"
+                    className="mt-3"
+                  />
                   <p className="mt-4 text-[0.9375rem] leading-relaxed text-foreground/75">
                     {activeProduct.description}
                   </p>

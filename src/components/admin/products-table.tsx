@@ -13,6 +13,8 @@ import {
   EyeOff,
 } from "lucide-react";
 import type { Product } from "@/lib/types";
+import { formatPrice, getDisplayPrice } from "@/lib/utils/price";
+import { MAX_HOMEPAGE_PRODUCTS } from "@/lib/catalog/filters";
 
 interface ProductsTableProps {
   products: Product[];
@@ -55,7 +57,10 @@ export function ProductsTable({
             <tr>
               <th className="px-4 py-3 font-medium">Proizvod</th>
               <th className="px-4 py-3 font-medium">Kategorija</th>
-              <th className="px-4 py-3 font-medium">Početna</th>
+              <th className="px-4 py-3 font-medium">Cijena</th>
+              <th className="px-4 py-3 font-medium">
+                Početna (max {MAX_HOMEPAGE_PRODUCTS})
+              </th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Količina</th>
               <th className="px-4 py-3 font-medium text-right">Akcije</th>
@@ -87,11 +92,29 @@ export function ProductsTable({
                 <td className="px-4 py-3 text-neutral-600">
                   {product.categoryLabel}
                 </td>
+                <td className="px-4 py-3 text-neutral-700">
+                  {(() => {
+                    const display = getDisplayPrice(product);
+                    if (!display) {
+                      return <span className="text-xs text-neutral-400">—</span>;
+                    }
+                    return (
+                      <span className="text-sm font-medium">
+                        {formatPrice(display.current)}
+                        {display.original != null && (
+                          <span className="ml-1 text-xs font-normal text-neutral-400 line-through">
+                            {formatPrice(display.original)}
+                          </span>
+                        )}
+                      </span>
+                    );
+                  })()}
+                </td>
                 <td className="px-4 py-3">
                   {product.showOnHomepage ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
                       <Home className="h-3 w-3" />
-                      Da ({product.homepageOrder ?? "-"})
+                      #{product.homepageOrder ?? "-"}
                     </span>
                   ) : (
                     <span className="text-xs text-neutral-400">Ne</span>

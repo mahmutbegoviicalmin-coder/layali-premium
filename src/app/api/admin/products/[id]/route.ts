@@ -7,6 +7,18 @@ import {
   enrichProduct,
 } from "@/lib/catalog/store";
 import { slugify } from "@/lib/utils/slugify";
+import {
+  MAX_HOMEPAGE_PRODUCTS,
+  countHomepageProducts,
+  promoteToHomepageFront,
+} from "@/lib/catalog/filters";
+
+function parseOptionalPrice(value: unknown): number | null {
+  if (value === undefined || value === null || value === "") return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return n;
+}
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -70,7 +82,47 @@ export async function PUT(request: Request, context: RouteContext) {
       (c) => c.id === (body.category ?? current.category)
     );
 
-    const updated: Product = {
+    const showOnHomepage =
+      body.showOnHomepage !== undefined
+        ? body.showOnHomepage === true
+        : current.showOnHomepage === true;
+
+    if (showOnHomepage && current.showOnHomepage !== true) {
+      const currentCount = countHomepageProducts(catalog.products, id);
+      if (currentCount >= MAX_HOMEPAGE_PRODUCTS) {
+        return NextResponse.json(
+          {
+            error: `Na početnoj može biti najviše ${MAX_HOMEPAGE_PRODUCTS} proizvoda. Uklonite jedan prije dodavanja novog.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    const price =
+      body.price !== undefined
+        ? parseOptionalPrice(body.price)
+        : (current.price ?? null);
+    const salePrice =
+      body.salePrice !== undefined
+        ? parseOptionalPrice(body.salePrice)
+        : (current.salePrice ?? null);
+
+    if (salePrice != null && price != null && salePrice > price) {
+      return NextResponse.json(
+        { error: "Snižena cijena ne može biti veća od redovne." },
+        { status: 400 }
+      );
+    }
+
+    const becomingFeatured =
+      showOnHomepage && current.showOnHomepage !== true;
+    const moveToFront =
+      showOnHomepage &&
+      (becomingFeatured ||
+        (body.homepageOrder !== undefined && Number(body.homepageOrder) === 1));
+
+    let updated: Product = {
       ...current,
       ...body,
       id: current.id,
@@ -83,9 +135,23 @@ export async function PUT(request: Request, context: RouteContext) {
         : body.image
           ? [body.image]
           : current.images,
+      showOnHomepage,
+      homepageOrder: becomingFeatured
+        ? 1
+        : body.homepageOrder !== undefined
+          ? Number(body.homepageOrder) || 1
+          : current.homepageOrder,
+      price,
+      salePrice,
     };
 
     catalog.products[index] = updated;
+
+    if (moveToFront) {
+      catalog.products = promoteToHomepageFront(catalog.products, id);
+      updated = catalog.products.find((p) => p.id === id) ?? updated;
+    }
+
     await writeCatalog(catalog);
 
     revalidatePath("/");

@@ -143,9 +143,11 @@ export function enrichProduct(
     orderCollection: product.orderCollection ?? "standard",
     categoryLabel: category?.label ?? product.categoryLabel,
     isActive: product.isActive !== false,
-    showOnHomepage: product.showOnHomepage !== false,
+    showOnHomepage: product.showOnHomepage === true,
     homepageOrder: product.homepageOrder ?? 999,
     collectionOrder: product.collectionOrder ?? 999,
+    price: product.price ?? null,
+    salePrice: product.salePrice ?? null,
   };
 }
 

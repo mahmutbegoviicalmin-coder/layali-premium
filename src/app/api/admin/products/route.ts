@@ -7,6 +7,18 @@ import {
   enrichProduct,
 } from "@/lib/catalog/store";
 import { slugify } from "@/lib/utils/slugify";
+import {
+  MAX_HOMEPAGE_PRODUCTS,
+  countHomepageProducts,
+  promoteToHomepageFront,
+} from "@/lib/catalog/filters";
+
+function parseOptionalPrice(value: unknown): number | null {
+  if (value === undefined || value === null || value === "") return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return n;
+}
 
 export async function GET() {
   try {
@@ -53,6 +65,28 @@ export async function POST(request: Request) {
     const image =
       body.image?.trim() || "/proizvodi/placeholder.png";
 
+    const showOnHomepage = body.showOnHomepage === true;
+    if (showOnHomepage) {
+      const currentCount = countHomepageProducts(catalog.products);
+      if (currentCount >= MAX_HOMEPAGE_PRODUCTS) {
+        return NextResponse.json(
+          {
+            error: `Na početnoj može biti najviše ${MAX_HOMEPAGE_PRODUCTS} proizvoda. Uklonite jedan prije dodavanja novog.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    const price = parseOptionalPrice(body.price);
+    const salePrice = parseOptionalPrice(body.salePrice);
+    if (salePrice != null && price != null && salePrice > price) {
+      return NextResponse.json(
+        { error: "Snižena cijena ne može biti veća od redovne." },
+        { status: 400 }
+      );
+    }
+
     const product: Product = {
       id: nextId,
       slug,
@@ -74,13 +108,18 @@ export async function POST(request: Request) {
       isNew: body.isNew ?? false,
       isBestSeller: body.isBestSeller ?? false,
       isHighlighted: body.isHighlighted ?? false,
-      showOnHomepage: body.showOnHomepage ?? false,
-      homepageOrder: body.homepageOrder ?? catalog.products.length + 1,
+      showOnHomepage,
+      homepageOrder: showOnHomepage ? 1 : (body.homepageOrder ?? 999),
+      price,
+      salePrice,
       availableQuantity: body.availableQuantity ?? null,
       isActive: body.isActive !== false,
     };
 
     catalog.products.push(product);
+    if (showOnHomepage) {
+      catalog.products = promoteToHomepageFront(catalog.products, product.id);
+    }
     await writeCatalog(catalog);
     revalidatePath("/");
     revalidatePath("/products");

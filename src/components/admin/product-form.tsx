@@ -18,6 +18,7 @@ import type {
   ProductTab,
 } from "@/lib/types";
 import { slugify } from "@/lib/utils/slugify";
+import { MAX_HOMEPAGE_PRODUCTS } from "@/lib/catalog/filters";
 
 /** Keep tags aligned with category + visibility flags for filters/badges. */
 function syncTags(form: Partial<Product>): ProductTab[] {
@@ -54,7 +55,9 @@ const emptyProduct = (): Partial<Product> => ({
   isBestSeller: false,
   isHighlighted: false,
   showOnHomepage: false,
-  homepageOrder: 10,
+  homepageOrder: 1,
+  price: null,
+  salePrice: null,
   availableQuantity: null,
   isActive: true,
 });
@@ -63,6 +66,7 @@ interface ProductFormProps {
   categories: CatalogCategory[];
   initialProduct?: Product | null;
   variant?: "modal" | "page";
+  homepageCount?: number;
   onSaved: () => void;
   onCancel?: () => void;
 }
@@ -108,6 +112,7 @@ export function ProductForm({
   categories,
   initialProduct,
   variant = "page",
+  homepageCount = 0,
   onSaved,
   onCancel,
 }: ProductFormProps) {
@@ -486,6 +491,50 @@ export function ProductForm({
               Opcionalno. Prikazuje se na detaljnoj stranici proizvoda.
             </FieldHint>
           </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-neutral-700">
+              Cijena (KM)
+            </label>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              value={form.price ?? ""}
+              onChange={(e) =>
+                update(
+                  "price",
+                  e.target.value === "" ? null : Number(e.target.value)
+                )
+              }
+              placeholder="npr. 45"
+              className="h-11 w-full rounded-xl border border-neutral-200 px-4 text-sm outline-none focus:border-neutral-400"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-neutral-700">
+              Snižena cijena (KM)
+            </label>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              value={form.salePrice ?? ""}
+              onChange={(e) =>
+                update(
+                  "salePrice",
+                  e.target.value === "" ? null : Number(e.target.value)
+                )
+              }
+              placeholder="Opcionalno"
+              className="h-11 w-full rounded-xl border border-neutral-200 px-4 text-sm outline-none focus:border-neutral-400"
+            />
+            <FieldHint>
+              Ako je unesena, prikazuje se kao akcijska cijena (stara se
+              precrtava).
+            </FieldHint>
+          </div>
         </div>
 
         <div className="mt-5 space-y-3">
@@ -526,21 +575,54 @@ export function ProductForm({
 
       <Section title="Prikaz i istaknutost" icon={<Package className="h-4 w-4" />} modal={isModal}>
         <p className="mb-4 text-sm text-neutral-500">
-          Kategorija (gore) određuje podstranicu/filter. Ovdje birate gdje se
-          proizvod dodatno ističe na sajtu.
+          Na početnoj može biti najviše {MAX_HOMEPAGE_PRODUCTS} proizvoda.
+          Novi istaknuti ide na prvo mjesto.
+          {` Trenutno: ${
+            form.showOnHomepage && !initialProduct?.showOnHomepage
+              ? homepageCount + 1
+              : form.showOnHomepage
+                ? Math.max(homepageCount, 1)
+                : homepageCount - (initialProduct?.showOnHomepage ? 1 : 0)
+          }/${MAX_HOMEPAGE_PRODUCTS}.`}
         </p>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          {[
-            {
-              key: "showOnHomepage" as const,
-              label: "Prikaži na početnoj stranici",
-            },
-            { key: "isBestSeller" as const, label: "Označi kao bestseler" },
-            { key: "isNew" as const, label: "Označi kao novi proizvod" },
-            { key: "isHighlighted" as const, label: "Istakni vizuelno (okvir)" },
-            { key: "isActive" as const, label: "Aktivan (vidljiv na sajtu)" },
-          ].map(({ key, label }) => (
+          <label className="flex items-center gap-2 rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-700">
+            <input
+              type="checkbox"
+              checked={Boolean(form.showOnHomepage)}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                const othersCount = initialProduct?.showOnHomepage
+                  ? homepageCount - 1
+                  : homepageCount;
+                if (checked && othersCount >= MAX_HOMEPAGE_PRODUCTS) {
+                  setError(
+                    `Na početnoj može biti najviše ${MAX_HOMEPAGE_PRODUCTS} proizvoda.`
+                  );
+                  return;
+                }
+                setError("");
+                setForm((prev) => ({
+                  ...prev,
+                  showOnHomepage: checked,
+                  homepageOrder: checked ? 1 : prev.homepageOrder,
+                }));
+              }}
+            />
+            Prikaži na početnoj stranici (max {MAX_HOMEPAGE_PRODUCTS})
+          </label>
+          {(
+            [
+              { key: "isBestSeller" as const, label: "Označi kao bestseler" },
+              { key: "isNew" as const, label: "Označi kao novi proizvod" },
+              {
+                key: "isHighlighted" as const,
+                label: "Istakni vizuelno (okvir)",
+              },
+              { key: "isActive" as const, label: "Aktivan (vidljiv na sajtu)" },
+            ] as const
+          ).map(({ key, label }) => (
             <label
               key={key}
               className="flex items-center gap-2 rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-700"
@@ -555,19 +637,24 @@ export function ProductForm({
           ))}
         </div>
 
-        <div className="mt-4">
-          <label className="mb-1 block text-sm font-medium text-neutral-700">
-            Redoslijed na početnoj
-          </label>
-          <input
-            type="number"
-            min={1}
-            value={form.homepageOrder ?? 10}
-            onChange={(e) => update("homepageOrder", Number(e.target.value))}
-            className="h-11 w-full max-w-xs rounded-xl border border-neutral-200 px-4 text-sm outline-none focus:border-neutral-400"
-          />
-          <FieldHint>Manji broj znači da proizvod stoji ranije u listi.</FieldHint>
-        </div>
+        {form.showOnHomepage && (
+          <div className="mt-4">
+            <label className="mb-1 block text-sm font-medium text-neutral-700">
+              Redoslijed na početnoj
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={MAX_HOMEPAGE_PRODUCTS}
+              value={form.homepageOrder ?? 1}
+              onChange={(e) => update("homepageOrder", Number(e.target.value))}
+              className="h-11 w-full max-w-xs rounded-xl border border-neutral-200 px-4 text-sm outline-none focus:border-neutral-400"
+            />
+            <FieldHint>
+              1 = prvi na početnoj. Pri uključivanju automatski ide na 1.
+            </FieldHint>
+          </div>
+        )}
       </Section>
 
       {error && (
