@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import path from "path";
-import { get, put } from "@vercel/blob";
+import { list, put } from "@vercel/blob";
 import type { CatalogData, Product } from "@/lib/types";
 import {
   filterProductsByTab,
@@ -12,7 +12,8 @@ import { getOrderCollection } from "@/lib/collection";
 
 const CATALOG_PATH = path.join(process.cwd(), "data", "catalog.json");
 const AROMA_PATH = path.join(process.cwd(), "data", "aroma-collection.json");
-const CATALOG_BLOB_PATHNAME = "data/catalog.json";
+/** Unique pathnames on each write so public Blob CDN never serves a stale catalog. */
+const CATALOG_BLOB_PREFIX = "data/catalog/";
 
 function useBlobStorage(): boolean {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
@@ -40,25 +41,51 @@ function writeLocalCatalog(data: CatalogData): void {
 }
 
 async function readBlobCatalog(): Promise<CatalogData | null> {
-  const result = await get(CATALOG_BLOB_PATHNAME, {
-    access: "private",
-    useCache: false,
+  const { blobs } = await list({
+    prefix: CATALOG_BLOB_PREFIX,
+    limit: 1000,
   });
 
-  if (!result?.stream) return null;
+  if (!blobs.length) return null;
 
-  const text = await new Response(result.stream).text();
-  return JSON.parse(text) as CatalogData;
+  const latest = [...blobs].sort(
+    (a, b) => +new Date(b.uploadedAt) - +new Date(a.uploadedAt)
+  )[0];
+
+  const res = await fetch(latest.url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Catalog blob fetch failed: ${res.status}`);
+  }
+
+  return (await res.json()) as CatalogData;
 }
 
 async function writeBlobCatalog(data: CatalogData): Promise<void> {
-  await put(CATALOG_BLOB_PATHNAME, JSON.stringify(data, null, 2), {
-    access: "private",
+  const pathname = `${CATALOG_BLOB_PREFIX}${Date.now()}.json`;
+  await put(pathname, JSON.stringify(data, null, 2), {
+    access: "public",
     contentType: "application/json",
-    allowOverwrite: true,
     addRandomSuffix: false,
     cacheControlMaxAge: 60,
   });
+
+  // Best-effort cleanup of older catalog versions (keep last 5)
+  try {
+    const { blobs } = await list({
+      prefix: CATALOG_BLOB_PREFIX,
+      limit: 1000,
+    });
+    const sorted = [...blobs].sort(
+      (a, b) => +new Date(b.uploadedAt) - +new Date(a.uploadedAt)
+    );
+    const stale = sorted.slice(5);
+    if (stale.length) {
+      const { del } = await import("@vercel/blob");
+      await del(stale.map((b) => b.url));
+    }
+  } catch (error) {
+    console.warn("[catalog] Could not prune old catalog blobs:", error);
+  }
 }
 
 export async function readCatalog(): Promise<CatalogData> {
@@ -72,7 +99,10 @@ export async function readCatalog(): Promise<CatalogData> {
       await writeBlobCatalog(seed);
       return seed;
     } catch (error) {
-      console.error("[catalog] Blob read failed, falling back to local file:", error);
+      console.error(
+        "[catalog] Blob read failed, falling back to local file:",
+        error
+      );
       return readLocalCatalog();
     }
   }
@@ -92,7 +122,6 @@ export function readAromaProductsRaw(): Product[] {
 export async function writeCatalog(data: CatalogData): Promise<void> {
   if (useBlobStorage()) {
     await writeBlobCatalog(data);
-    // Keep local copy in sync during local/dev when possible
     try {
       writeLocalCatalog(data);
     } catch {
