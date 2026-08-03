@@ -46,7 +46,6 @@ export function groupProductsByCategory(products: Product[]): Array<{
 export function filterProductsByTab(products: Product[], tab: string): Product[] {
   if (tab === "best-sellers") return products.filter((p) => p.isBestSeller);
   if (tab === "new-arrivals") return products.filter((p) => p.isNew);
-  if (tab === "premium") return products.filter((p) => p.tags.includes("premium"));
   if (CATEGORY_DISPLAY_ORDER.includes(tab as ProductCategory)) {
     return products.filter((p) => p.category === tab);
   }
@@ -56,7 +55,25 @@ export function filterProductsByTab(products: Product[], tab: string): Product[]
 export function filterHomepageProducts(products: Product[]): Product[] {
   return sortProductsByCategory(
     products.filter(
-      (p) => p.showOnHomepage !== false && p.isActive !== false
+      (p) =>
+        p.showOnHomepage !== false &&
+        p.isActive !== false &&
+        (p.orderCollection ?? "standard") === "standard"
     )
   );
+}
+
+export function sortAromaProducts(products: Product[]): Product[] {
+  return [...products].sort((a, b) => {
+    const ai = CATEGORY_DISPLAY_ORDER.indexOf(a.category);
+    const bi = CATEGORY_DISPLAY_ORDER.indexOf(b.category);
+    const aRank = ai === -1 ? 99 : ai;
+    const bRank = bi === -1 ? 99 : bi;
+    if (aRank !== bRank) return aRank - bRank;
+    return (a.collectionOrder ?? 999) - (b.collectionOrder ?? 999);
+  });
+}
+
+export function groupAromaProductsByCategory(products: Product[]) {
+  return groupProductsByCategory(sortAromaProducts(products));
 }

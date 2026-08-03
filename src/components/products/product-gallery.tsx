@@ -1,25 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { ProductImage } from "@/components/products/product-image";
 
 interface ProductGalleryProps {
   images: string[];
   name: string;
+  imageFit?: "cover" | "contain";
+  imageClassName?: string;
 }
 
-export function ProductGallery({ images, name }: ProductGalleryProps) {
+export function ProductGallery({
+  images,
+  name,
+  imageFit = "cover",
+  imageClassName,
+}: ProductGalleryProps) {
   const [selected, setSelected] = useState(0);
 
   return (
     <div className="space-y-4">
-      <div className="relative aspect-square overflow-hidden rounded-[24px] bg-white shadow-soft">
-        <Image
+      <div
+        className={cn(
+          "relative aspect-square overflow-hidden rounded-[24px] bg-white shadow-soft",
+          imageClassName
+        )}
+      >
+        <ProductImage
           src={images[selected]}
           alt={name}
           fill
-          className="object-cover"
+          className={cn(imageFit === "contain" ? "object-contain" : "object-cover")}
           sizes="(max-width: 768px) 100vw, 50vw"
           priority
         />
@@ -38,11 +50,11 @@ export function ProductGallery({ images, name }: ProductGalleryProps) {
                   : "border-transparent opacity-70 hover:opacity-100"
               )}
             >
-              <Image
+              <ProductImage
                 src={img}
                 alt=""
                 fill
-                className="object-cover"
+                className={imageFit === "contain" ? "object-contain p-1" : "object-cover"}
                 sizes="80px"
               />
             </button>

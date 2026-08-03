@@ -11,17 +11,25 @@ import {
   ImageIcon,
   ListChecks,
 } from "lucide-react";
-import type { CatalogCategory, Product, ProductCategory, ProductTab } from "@/lib/types";
+import type {
+  CatalogCategory,
+  Product,
+  ProductCategory,
+  ProductTab,
+} from "@/lib/types";
 import { slugify } from "@/lib/utils/slugify";
 
-const TAB_OPTIONS: { id: ProductTab; label: string }[] = [
-  { id: "best-sellers", label: "Bestseleri" },
-  { id: "new-arrivals", label: "Novi proizvodi" },
-  { id: "fruit", label: "Voćni okusi" },
-  { id: "ice", label: "Ledeni okusi" },
-  { id: "exotic", label: "Egzotične mješavine" },
-  { id: "premium", label: "Premium serija" },
-];
+/** Keep tags aligned with category + visibility flags for filters/badges. */
+function syncTags(form: Partial<Product>): ProductTab[] {
+  const tags = new Set<ProductTab>();
+  const categoryTabs: ProductTab[] = ["fruit", "ice", "exotic", "premium"];
+  if (form.category && categoryTabs.includes(form.category as ProductTab)) {
+    tags.add(form.category as ProductTab);
+  }
+  if (form.isBestSeller) tags.add("best-sellers");
+  if (form.isNew) tags.add("new-arrivals");
+  return Array.from(tags);
+}
 
 const emptyProduct = (): Partial<Product> => ({
   name: "",
@@ -145,17 +153,27 @@ export function ProductForm({
   const handleUpload = async (file: File) => {
     setUploading(true);
     setError("");
+    setSuccess("");
     try {
       const body = new FormData();
       body.append("file", file);
       const res = await fetch("/api/admin/upload", { method: "POST", body });
-      const data = (await res.json()) as { url?: string; error?: string };
+      let data: { url?: string; error?: string } = {};
+      try {
+        data = (await res.json()) as { url?: string; error?: string };
+      } catch {
+        setError("Upload slike nije uspio (nevažeći odgovor servera).");
+        return;
+      }
       if (!res.ok || !data.url) {
         setError(data.error ?? "Upload slike nije uspio.");
         return;
       }
-      update("image", data.url);
-      update("images", [data.url]);
+      setForm((prev) => ({
+        ...prev,
+        image: data.url,
+        images: [data.url!],
+      }));
       setSuccess("Slika je učitana.");
     } catch {
       setError("Greška pri uploadu slike.");
@@ -170,13 +188,19 @@ export function ProductForm({
     setError("");
     setSuccess("");
 
+    if (!form.image?.trim()) {
+      setError("Dodajte sliku proizvoda prije čuvanja.");
+      setSaving(false);
+      return;
+    }
+
     const specifications = Object.fromEntries(
       specRows
         .filter((row) => row.key.trim())
         .map((row) => [row.key.trim(), row.value.trim()])
     );
 
-    const payload: Partial<Product> = {
+    const withFlags = {
       ...form,
       packagingSizes: packagingInput
         .split(",")
@@ -187,6 +211,11 @@ export function ProductForm({
         form.availableQuantity === undefined || form.availableQuantity === null
           ? null
           : Number(form.availableQuantity),
+    };
+
+    const payload: Partial<Product> = {
+      ...withFlags,
+      tags: syncTags(withFlags),
     };
 
     try {
@@ -201,7 +230,13 @@ export function ProductForm({
         body: JSON.stringify(payload),
       });
 
-      const data = (await res.json()) as { error?: string };
+      let data: { error?: string } = {};
+      try {
+        data = (await res.json()) as { error?: string };
+      } catch {
+        setError("Greška pri čuvanju proizvoda (nevažeći odgovor servera).");
+        return;
+      }
       if (!res.ok) {
         setError(data.error ?? "Čuvanje nije uspjelo.");
         return;
@@ -290,6 +325,10 @@ export function ProductForm({
                 </option>
               ))}
             </select>
+            <FieldHint>
+              Odabir kategorije određuje gdje se proizvod pojavljuje u filterima
+              i grupama na /products stranici.
+            </FieldHint>
           </div>
 
           <div>
@@ -366,6 +405,7 @@ export function ProductForm({
                 src={form.image}
                 alt={form.name || "Preview"}
                 fill
+                unoptimized={form.image.startsWith("http")}
                 className="object-cover"
                 sizes="120px"
               />
@@ -400,8 +440,8 @@ export function ProductForm({
               />
             </label>
             <FieldHint>
-              Slika se čuva u public/proizvodi folderu. Preporučena veličina
-              kao kod postojećih proizvoda.
+              Na Vercelu se slika čuva u Blob storage-u i odmah je dostupna na
+              sajtu. Preporučena veličina kao kod postojećih proizvoda.
             </FieldHint>
           </div>
         </div>
@@ -486,31 +526,11 @@ export function ProductForm({
 
       <Section title="Prikaz i istaknutost" icon={<Package className="h-4 w-4" />} modal={isModal}>
         <p className="mb-4 text-sm text-neutral-500">
-          Odaberite gdje i kako se proizvod prikazuje na sajtu.
+          Kategorija (gore) određuje podstranicu/filter. Ovdje birate gdje se
+          proizvod dodatno ističe na sajtu.
         </p>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          {TAB_OPTIONS.map((tab) => (
-            <label
-              key={tab.id}
-              className="flex items-center gap-2 rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-700"
-            >
-              <input
-                type="checkbox"
-                checked={form.tags?.includes(tab.id) ?? false}
-                onChange={(e) => {
-                  const tags = new Set(form.tags ?? []);
-                  if (e.target.checked) tags.add(tab.id);
-                  else tags.delete(tab.id);
-                  update("tags", Array.from(tags));
-                }}
-              />
-              {tab.label}
-            </label>
-          ))}
-        </div>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {[
             {
               key: "showOnHomepage" as const,

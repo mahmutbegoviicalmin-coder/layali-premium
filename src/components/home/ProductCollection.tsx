@@ -1,15 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useProducts } from "@/context/products-context";
+import { ProductImage } from "@/components/products/product-image";
 import { cn } from "@/lib/utils";
 
-const SLIDE_MS = 520;
-
-type SlideDirection = "next" | "prev";
+const SLIDE_MS = 380;
 
 function StrengthDots({ strength }: { strength: number }) {
   return (
@@ -18,7 +16,7 @@ function StrengthDots({ strength }: { strength: number }) {
         <span
           key={i}
           className={cn(
-            "h-1 rounded-full transition-[width,background-color] duration-300",
+            "h-1 rounded-full",
             i < strength ? "w-5 bg-primary" : "w-1 bg-border"
           )}
         />
@@ -30,66 +28,178 @@ function StrengthDots({ strength }: { strength: number }) {
 export function ProductCollection() {
   const { homepageProducts, loading } = useProducts();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [previousIndex, setPreviousIndex] = useState<number | null>(null);
-  const [direction, setDirection] = useState<SlideDirection>("next");
-  const [isAnimating, setIsAnimating] = useState(false);
   const [showAltImage, setShowAltImage] = useState(false);
-  const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const thumbStripRef = useRef<HTMLDivElement>(null);
+
+  const [slide, setSlide] = useState<{
+    from: number;
+    to: number;
+    direction: 1 | -1;
+    phase: "start" | "end";
+  } | null>(null);
+
+  const animatingRef = useRef(false);
+  const slideTimerRef = useRef<number | null>(null);
+  const activeIndexRef = useRef(0);
 
   const count = homepageProducts.length;
+
+  const clearSlideTimer = () => {
+    if (slideTimerRef.current !== null) {
+      window.clearTimeout(slideTimerRef.current);
+      slideTimerRef.current = null;
+    }
+  };
+
+  const goTo = useCallback(
+    (index: number) => {
+      if (count === 0 || animatingRef.current) return;
+      const normalized = ((index % count) + count) % count;
+      if (normalized === activeIndex) return;
+
+      clearSlideTimer();
+      animatingRef.current = true;
+      setShowAltImage(false);
+
+      const direction: 1 | -1 =
+        normalized === activeIndex
+          ? 1
+          : normalized > activeIndex
+            ? 1
+            : normalized < activeIndex
+              ? -1
+              : 1;
+
+      // Wrap-aware direction (e.g. last → first should feel like "next")
+      let dir: 1 | -1 = direction;
+      if (activeIndex === count - 1 && normalized === 0) dir = 1;
+      if (activeIndex === 0 && normalized === count - 1) dir = -1;
+
+      setSlide({
+        from: activeIndex,
+        to: normalized,
+        direction: dir,
+        phase: "start",
+      });
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setSlide((current) =>
+            current ? { ...current, phase: "end" } : current
+          );
+        });
+      });
+
+      slideTimerRef.current = window.setTimeout(() => {
+        setActiveIndex(normalized);
+        setSlide(null);
+        animatingRef.current = false;
+        slideTimerRef.current = null;
+      }, SLIDE_MS);
+    },
+    [activeIndex, count]
+  );
+
+  activeIndexRef.current = activeIndex;
+
   const activeProduct = homepageProducts[activeIndex];
-  const previousProduct =
-    previousIndex !== null ? homepageProducts[previousIndex] : null;
   const altImage =
     activeProduct && activeProduct.images.length > 1
       ? activeProduct.images[1]
       : null;
 
-  const goTo = useCallback(
-    (index: number, dir: SlideDirection) => {
-      if (count === 0 || isAnimating) return;
-      const normalized = ((index % count) + count) % count;
-      if (normalized === activeIndex) return;
+  const prev = () => goTo(activeIndex - 1);
+  const next = () => goTo(activeIndex + 1);
 
-      setDirection(dir);
-      setPreviousIndex(activeIndex);
-      setActiveIndex(normalized);
-      setShowAltImage(false);
-      setIsAnimating(true);
+  useEffect(() => {
+    return () => clearSlideTimer();
+  }, []);
 
-      window.setTimeout(() => {
-        setPreviousIndex(null);
-        setIsAnimating(false);
-      }, SLIDE_MS);
-    },
-    [activeIndex, count, isAnimating]
-  );
+  useEffect(() => {
+    if (count === 0) return;
 
-  const prev = () => goTo(activeIndex - 1, "prev");
-  const next = () => goTo(activeIndex + 1, "next");
+    const indices = new Set<number>([
+      activeIndex,
+      (activeIndex + 1) % count,
+      (activeIndex - 1 + count) % count,
+    ]);
+
+    indices.forEach((i) => {
+      const product = homepageProducts[i];
+      if (!product) return;
+      const img = new window.Image();
+      img.src = product.image;
+    });
+  }, [activeIndex, count, homepageProducts]);
+
+  const goToRef = useRef(goTo);
+  goToRef.current = goTo;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") goTo(activeIndex - 1, "prev");
-      if (e.key === "ArrowRight") goTo(activeIndex + 1, "next");
+      if (e.key === "ArrowLeft") goToRef.current(activeIndexRef.current - 1);
+      if (e.key === "ArrowRight") goToRef.current(activeIndexRef.current + 1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [activeIndex, goTo]);
+  }, []);
 
   useEffect(() => {
-    const el = thumbRefs.current[activeIndex];
-    el?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
+    const strip = thumbStripRef.current;
+    if (!strip) return;
+
+    const thumb = strip.children[activeIndex] as HTMLElement | undefined;
+    if (!thumb) return;
+
+    const target =
+      thumb.offsetLeft - strip.clientWidth / 2 + thumb.offsetWidth / 2;
+
+    strip.scrollTo({ left: target, behavior: "auto" });
   }, [activeIndex]);
 
-  const slideInClass =
-    direction === "next" ? "product-slide-in-next" : "product-slide-in-prev";
-  const slideOutClass =
-    direction === "next" ? "product-slide-out-next" : "product-slide-out-prev";
+  const renderSlideImage = (
+    productIndex: number,
+    options?: { allowAlt?: boolean }
+  ) => {
+    const product = homepageProducts[productIndex];
+    if (!product) return null;
+
+    const secondary =
+      product.images.length > 1 ? product.images[1] : null;
+    const isActive = productIndex === activeIndex;
+    const showAlt =
+      options?.allowAlt && isActive && showAltImage && secondary;
+
+    return (
+      <ProductImage
+        src={showAlt ? secondary! : product.image}
+        alt={product.name}
+        width={560}
+        height={560}
+        className="max-h-full w-full object-contain"
+        sizes="(max-width: 1024px) 90vw, 480px"
+        priority={productIndex < 2}
+      />
+    );
+  };
+
+  const slideTransform = slide
+    ? slide.direction === 1
+      ? slide.phase === "start"
+        ? "translate3d(0, 0, 0)"
+        : "translate3d(-50%, 0, 0)"
+      : slide.phase === "start"
+        ? "translate3d(-50%, 0, 0)"
+        : "translate3d(0, 0, 0)"
+    : "translate3d(0, 0, 0)";
+
+  const slideTransition =
+    slide && slide.phase === "end"
+      ? `transform ${SLIDE_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
+      : "none";
+
+  const fromIndex = slide?.from ?? activeIndex;
+  const toIndex = slide?.to ?? activeIndex;
 
   return (
     <section className="border-t border-border/70 bg-background">
@@ -130,46 +240,43 @@ export function ProductCollection() {
                   onMouseEnter={() => altImage && setShowAltImage(true)}
                   onMouseLeave={() => setShowAltImage(false)}
                 >
-                  <div className="absolute inset-0 overflow-hidden">
-                    {previousProduct && (
+                  <div className="relative h-full w-full">
+                    {slide ? (
                       <div
                         className={cn(
-                          "gpu-layer absolute inset-0 flex items-center justify-center p-8 sm:p-12",
-                          slideOutClass
+                          "product-slider-track flex h-full w-[200%] gpu-layer",
+                          slide?.phase === "end" && "is-sliding"
                         )}
+                        style={{
+                          transform: slideTransform,
+                          transition: slideTransition,
+                        }}
                       >
-                        <Image
-                          src={previousProduct.image}
-                          alt=""
-                          width={560}
-                          height={560}
-                          className="max-h-full w-full object-contain drop-shadow-[0_24px_48px_rgba(242,95,65,0.15)]"
-                          sizes="(max-width: 1024px) 90vw, 480px"
-                          aria-hidden
-                        />
+                        {slide.direction === 1 ? (
+                          <>
+                            <div className="flex w-1/2 shrink-0 items-center justify-center p-8 sm:p-12">
+                              {renderSlideImage(fromIndex)}
+                            </div>
+                            <div className="flex w-1/2 shrink-0 items-center justify-center p-8 sm:p-12">
+                              {renderSlideImage(toIndex)}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex w-1/2 shrink-0 items-center justify-center p-8 sm:p-12">
+                              {renderSlideImage(toIndex)}
+                            </div>
+                            <div className="flex w-1/2 shrink-0 items-center justify-center p-8 sm:p-12">
+                              {renderSlideImage(fromIndex)}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex h-full items-center justify-center p-8 sm:p-12 gpu-layer">
+                        {renderSlideImage(activeIndex, { allowAlt: true })}
                       </div>
                     )}
-
-                    <div
-                      className={cn(
-                        "gpu-layer absolute inset-0 flex items-center justify-center p-8 sm:p-12",
-                        previousProduct && slideInClass
-                      )}
-                    >
-                      <Image
-                        src={
-                          showAltImage && altImage
-                            ? altImage
-                            : activeProduct.image
-                        }
-                        alt={activeProduct.name}
-                        width={560}
-                        height={560}
-                        className="max-h-full w-full object-contain drop-shadow-[0_24px_48px_rgba(242,95,65,0.15)] transition-opacity duration-300 ease-out"
-                        sizes="(max-width: 1024px) 90vw, 480px"
-                        priority={activeIndex < 2}
-                      />
-                    </div>
                   </div>
 
                   {(activeProduct.isBestSeller || activeProduct.isNew) && (
@@ -185,7 +292,7 @@ export function ProductCollection() {
                     </span>
                   )}
 
-                  {altImage && (
+                  {altImage && !slide && (
                     <p className="absolute bottom-4 left-4 z-10 text-[0.6875rem] text-muted opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                       Drugi prikaz pakovanja
                     </p>
@@ -196,8 +303,7 @@ export function ProductCollection() {
                   type="button"
                   aria-label="Prethodni proizvod"
                   onClick={prev}
-                  disabled={isAnimating}
-                  className="absolute left-0 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary shadow-lg ring-1 ring-black/5 transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 lg:left-3 lg:translate-x-0"
+                  className="absolute left-0 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary shadow-lg ring-1 ring-black/5 transition-transform duration-200 hover:scale-105 active:scale-95 lg:left-3 lg:translate-x-0"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
@@ -205,41 +311,14 @@ export function ProductCollection() {
                   type="button"
                   aria-label="Sljedeći proizvod"
                   onClick={next}
-                  disabled={isAnimating}
-                  className="absolute right-0 top-1/2 z-10 translate-x-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary shadow-lg ring-1 ring-black/5 transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 lg:right-3 lg:translate-x-0"
+                  className="absolute right-0 top-1/2 z-10 translate-x-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary shadow-lg ring-1 ring-black/5 transition-transform duration-200 hover:scale-105 active:scale-95 lg:right-3 lg:translate-x-0"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="relative min-w-0 overflow-hidden">
-                {previousProduct && (
-                  <div
-                    className={cn(
-                      "absolute inset-0",
-                      direction === "next"
-                        ? "product-text-slide-out-next"
-                        : "product-text-slide-out-prev"
-                    )}
-                    aria-hidden
-                  >
-                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                      {previousProduct.categoryLabel}
-                    </p>
-                    <h3 className="mt-2 font-heading text-[2rem] font-medium leading-[1.08] tracking-tight text-foreground sm:text-[2.75rem]">
-                      {previousProduct.name}
-                    </h3>
-                  </div>
-                )}
-
-                <div
-                  className={cn(
-                    previousProduct &&
-                      (direction === "next"
-                        ? "product-text-slide-in-next"
-                        : "product-text-slide-in-prev")
-                  )}
-                >
+              <div className="relative min-w-0">
+                <div key={activeProduct.id} className="product-info-fade">
                   <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
                     {activeProduct.categoryLabel}
                     <span className="mx-2 text-border">·</span>
@@ -274,7 +353,7 @@ export function ProductCollection() {
                   </span>
                   <div className="h-px flex-1 max-w-[120px] bg-border">
                     <div
-                      className="h-full origin-left bg-primary transition-transform duration-500 ease-out"
+                      className="h-full origin-left bg-primary transition-transform duration-[380ms] ease-out"
                       style={{
                         transform: `scaleX(${
                           count > 1 ? activeIndex / (count - 1) : 1
@@ -290,31 +369,25 @@ export function ProductCollection() {
               <p className="mb-4 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted">
                 Svi okusi u ponudi
               </p>
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              <div
+                ref={thumbStripRef}
+                className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
+              >
                 {homepageProducts.map((product, i) => (
                   <button
                     key={product.id}
-                    ref={(el) => {
-                      thumbRefs.current[i] = el;
-                    }}
                     type="button"
                     aria-label={product.name}
                     aria-current={i === activeIndex ? "true" : undefined}
-                    onClick={() => {
-                      if (i === activeIndex) return;
-                      const forward = (i - activeIndex + count) % count;
-                      const backward = (activeIndex - i + count) % count;
-                      goTo(i, forward <= backward ? "next" : "prev");
-                    }}
-                    disabled={isAnimating}
+                    onClick={() => goTo(i)}
                     className={cn(
-                      "relative flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#f3f3f6] p-2 transition-[opacity,transform,box-shadow] duration-300 sm:h-20 sm:w-20",
+                      "relative flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#f3f3f6] p-2 transition-[opacity,transform] duration-200 sm:h-20 sm:w-20",
                       i === activeIndex
                         ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105"
                         : "opacity-60 hover:opacity-100 hover:ring-1 hover:ring-black/10"
                     )}
                   >
-                    <Image
+                    <ProductImage
                       src={product.image}
                       alt=""
                       width={80}

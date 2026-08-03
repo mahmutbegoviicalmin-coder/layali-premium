@@ -71,6 +71,7 @@ export function ProductsTable({
                         src={product.image}
                         alt={product.name}
                         fill
+                        unoptimized={product.image.startsWith("http")}
                         className="object-cover"
                         sizes="44px"
                       />

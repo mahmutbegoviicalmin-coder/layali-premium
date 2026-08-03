@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Heart, Eye } from "lucide-react";
 import type { Product } from "@/lib/types";
@@ -8,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProductImageBadges } from "@/components/products/product-status-badge";
 import { StrengthIndicator } from "@/components/products/strength-indicator";
+import { ProductImage } from "@/components/products/product-image";
 import { useSavedProducts } from "@/context/saved-products-context";
 import { cn } from "@/lib/utils";
 
@@ -34,15 +34,15 @@ export function ProductCard({
         <Link
           href={`/products/${product.slug}`}
           className={cn(
-            "flex flex-col overflow-hidden rounded-2xl border bg-card transition-[border-color,box-shadow,transform] duration-200 active:border-primary/30",
+            "flex flex-col overflow-hidden rounded-2xl border bg-card transition-[border-color,transform] duration-200 active:border-primary/30",
             product.isHighlighted && "ring-2 ring-primary/25",
             elevated
-              ? "border-border shadow-[0_6px_28px_rgba(0,0,0,0.09)] hover:-translate-y-0.5 hover:border-primary/15 hover:shadow-[0_10px_36px_rgba(0,0,0,0.12)]"
+              ? "border-border hover:-translate-y-0.5 hover:border-primary/15"
               : "border-border"
           )}
         >
           <div className="relative aspect-square overflow-hidden bg-surface">
-            <Image
+            <ProductImage
               src={product.image}
               alt={product.name}
               fill
@@ -73,20 +73,20 @@ export function ProductCard({
   return (
     <article
       className={cn(
-        "group flex w-[280px] shrink-0 flex-col overflow-hidden rounded-2xl border bg-card transition-[border-color,box-shadow,transform] duration-200 md:w-[300px] hover:-translate-y-1",
+        "group flex w-[280px] shrink-0 flex-col overflow-hidden rounded-2xl border bg-card transition-[border-color,transform] duration-200 md:w-[300px] hover:-translate-y-1",
         elevated
-          ? "border-border shadow-[0_8px_32px_rgba(0,0,0,0.08)] hover:border-primary/15 hover:shadow-[0_14px_40px_rgba(0,0,0,0.12)]"
+          ? "border-border hover:border-primary/15"
           : "border-border hover:border-primary/20",
         product.isHighlighted && "ring-2 ring-primary/20",
         className
       )}
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-surface">
-        <Image
+        <ProductImage
           src={product.image}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+          className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.02]"
           sizes="300px"
         />
         {product.isNew || product.isBestSeller ? (
